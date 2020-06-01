@@ -1,0 +1,66 @@
+# Libraries for Silge & Robinson Chapter 1 ----
+
+library(gutenbergr)
+library(tidyverse)
+library(tidytext)
+library(dplyr)
+# This script assumes you have already generated data frame
+# ja_word_freq_nostop (i.e. it is in Environment pane)
+# Import Austen books ----
+
+ja_books <- gutenberg_download(c(161,1342,141,158,121,105))
+hg_books <- gutenberg_download(c(35,36,159,5230))
+bs_books <- gutenberg_download(c(767,768,969,1260,9182))
+
+# Tidy Austen books ----
+
+ja_tidy <- ja_books %>%
+  unnest_tokens(word,text)
+
+hg_tidy <- hg_books %>%
+  unnest_tokens(word,text)
+
+bs_tidy <- bs_books %>%
+  unnest_tokens(word,text)
+
+# Get word frequencies for Austen books ----
+
+ja_word_freq <- ja_tidy %>%
+  count(word,sort=TRUE) %>% mutate(ja_percent = (n / sum(n)) * 100)
+
+hg_word_freq <- hg_tidy %>%
+  count(word,sort=TRUE) %>% mutate(hg_percent = (n / sum(n)) * 100)
+
+bs_word_freq <- bs_tidy %>%
+  count(word,sort=TRUE) %>% mutate(bs_percent = (n / sum(n)) * 100)
+
+# Tidy Austen books ----
+
+ja_tidy_no_stop <- ja_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+
+hg_tidy_no_stop <- hg_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+
+bs_tidy_no_stop <- bs_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+
+# Get word frequencies for Austen books ----
+
+ja_word_freq_no_stop <- ja_tidy_no_stop %>%
+  count(word,sort=TRUE) %>% mutate(ja_percent = (n / sum(n)) * 100)
+
+hg_word_freq_no_stop <- hg_tidy_no_stop %>%
+  count(word,sort=TRUE) %>% mutate(hg_percent = (n / sum(n)) * 100)
+
+bs_word_freq_no_stop <- bs_tidy_no_stop %>%
+  count(word,sort=TRUE) %>% mutate(bs_percent = (n / sum(n)) * 100)
+
+# Combining all word percents in one
+
+all_words_percents <- full_join(ja_word_freq,full_join(hg_word_freq,bs_word_freq,by="word"),by="word")
+all_words_percents_no_stop <- full_join(ja_word_freq_no_stop,full_join(hg_word_freq_no_stop,bs_word_freq_no_stop,by="word"), by="word")
+all_words_precents_no_na <- inner_join(ja_word_freq_no_stop,inner_join(hg_word_freq_no_stop,bs_word_freq_no_stop,by="word"), by="word")
