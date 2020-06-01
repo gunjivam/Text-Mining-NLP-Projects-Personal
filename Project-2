@@ -1,0 +1,261 @@
+# The following script imports the files in
+# the midterm project.  In the next unit 
+# we'll see how to get RStudio to do this kind of work 
+# for us in general, without scripts.
+
+#importing libraries
+
+
+library(scales)
+library(stylo)
+
+# The HarryPotterSeries.txt file is a delimited file.
+# (We'll talk abut these further next unit.)
+# Package readr has handy importing functions.
+# You can name your data frame whatever you wish,
+# I'm just calling it HP_dataframe here.
+library(readr)
+HarryPotter_dataframe <- read_csv("HarryPotterSeries.txt")
+
+
+# The txt files in the corpus folder are raw text files.
+# (Be sure to make the corpus folder the working directory.)
+# In the code below I'll just use the generic "book.txt" as
+# the name of one of these files.  Substitute the correct 
+# file name and your own data frame name to use the code.
+library(tidytext)
+
+
+#Getting the word Frequencies
+
+hp_word_freq <- HarryPotter_dataframe %>%
+  count(word,sort=TRUE)
+
+hp_word_freq_no_stop <- HarryPotter_dataframe %>%
+  count(word,sort=TRUE) %>%
+  anti_join(stop_words)
+
+# Top 10 Words
+
+hp_word_freq_10 <- top_n(hp_word_freq,10)
+
+hp_word_freq_no_stop_10 <- top_n(hp_word_freq_no_stop,10)
+
+
+# Book 1
+library(ggplot2)
+library(dplyr)
+Philosophers_stone_word_freq_no_stop <- HP_dataframe %>% filter(book == "Philosopher's Stone") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Philosophers_stone_word_freq_no_stop_10 <- top_n(Philosophers_stone_word_freq_no_stop,10)
+
+ggplot(Philosophers_stone_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="white",fill= "red")+ 
+  ggtitle("Philosopher's Stone")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip() 
+
+# Book 2
+Chambers_of_secrets_word_freq_no_stop <- HP_dataframe %>% filter(book == "Chamber of Secrets") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Chambers_of_secrets_word_freq_no_stop_10 <- top_n(Chambers_of_secrets_word_freq_no_stop,10)
+
+ggplot(Chambers_of_secrets_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="blue",fill= "green")+ 
+  ggtitle("Chamber of Secrets")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+# Book 3
+Prisoner_of_Azkaban_word_freq_no_stop <- HP_dataframe %>% filter(book == "Prisoner of Azkaban") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Prisoner_of_Azkaban_word_freq_no_stop_10 <- top_n(Prisoner_of_Azkaban_word_freq_no_stop,10)
+
+ggplot(Prisoner_of_Azkaban_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="blue",fill= "green")+ 
+  ggtitle("Prisoner of Azkaban")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+# Book 4
+Goblet_of_Fire_word_freq_no_stop <- HP_dataframe %>% filter(book == "Goblet of Fire") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Goblet_of_Fire_word_freq_no_stop_10 <- top_n(Goblet_of_Fire_word_freq_no_stop,10)
+
+ggplot(Goblet_of_Fire_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="red",fill= "yellow")+ 
+  ggtitle("Goblet of Fire")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+# Book 5
+Order_of_Phoenix_word_freq_no_stop <- HP_dataframe %>% filter(book == "Order of the Phoenix") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Order_of_Phoenix_word_freq_no_stop_10 <- top_n(Order_of_Phoenix_word_freq_no_stop,10)
+
+ggplot(Order_of_Phoenix_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="orange",fill= "green")+ 
+  ggtitle("Order of the Phoenix")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+# Book 6
+Half_Blood_Prince_word_freq_no_stop <- HP_dataframe %>% filter(book == "Half-Blood Prince") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Half_Blood_Prince_word_freq_no_stop_10 <- top_n(Half_Blood_Prince_word_freq_no_stop,10)
+
+ggplot(Half_Blood_Prince_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="red",fill= "black")+ 
+  ggtitle("Half-Blood Prince")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+# Book 7
+Deathly_Hallows_word_freq_no_stop <- HP_dataframe %>% filter(book == "Deathly Hallows") %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Deathly_Hallows_word_freq_no_stop_10 <- top_n(Deathly_Hallows_word_freq_no_stop,10)
+
+ggplot(Deathly_Hallows_word_freq_no_stop_10,aes(word,n)) +
+  geom_col(color="pink",fill= "blue")+ 
+  ggtitle("Deathly Hallows")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+ 
+# (Ideally someone familiar with the stories should be able to tell which book it is at a  glance.)
+library(wordcloud)
+Deathly_Hallows_word_freq_no_stop %>%
+  with(wordcloud(word, n, max.words = 1000))
+
+
+Hunger_Games_word_freq_no_stop <- rbind(read_csv("Collins_HG1.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Collins_HG2.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Collins_HG3.txt",col_names=FALSE) %>% unnest_tokens(word,X1)) %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+ggplot(top_n(Hunger_Games_word_freq_no_stop,10),aes(word,n)) +
+  geom_col(color="red",fill= "green")+ 
+  ggtitle("Hunger Games")+
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()
+
+
+JK_Rowling_word_freq_no_stop <- rbind(read_csv("Rowling_HP1.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP2.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP3.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP4.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP5.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP6.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                      read_csv("Rowling_HP7.txt",col_names=FALSE) %>% unnest_tokens(word,X1)) %>%
+  count(word,sort=TRUE) %>% anti_join(stop_words)
+
+Hunger_Games_word_freq_no_stop$HG_percent <- (Hunger_Games_word_freq_no_stop$n)/sum(Hunger_Games_word_freq_no_stop$n)
+JK_Rowling_word_freq_no_stop$JK_percent <- (JK_Rowling_word_freq_no_stop$n)/sum(JK_Rowling_word_freq_no_stop$n)
+
+
+all_words_percents <- JK_Rowling_word_freq_no_stop %>% merge(Hunger_Games_word_freq_no_stop, by = "word")
+ggplot(all_words_percents, aes(x = JK_percent, y = HG_percent, color = abs(HG_percent - JK_percent))) +
+  geom_abline(color = "gray40", lty = 2) +
+  geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
+  scale_x_log10(labels = percent_format()) +
+  scale_y_log10(labels = percent_format()) +
+  scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "black") +
+  theme(legend.position="none") +
+  labs(y = "Hunger Games Series", x = "JK Rowling Series")
+
+
+Hunger_Game_Dataframe <- rbind(read_csv("Collins_HG1.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                               read_csv("Collins_HG2.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+                               read_csv("Collins_HG3.txt",col_names=FALSE) %>% unnest_tokens(word,X1))
+JK_Dataframe <- rbind(read_csv("Rowling_HP1.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP2.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP3.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP4.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP5.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP6.txt",col_names=FALSE) %>% unnest_tokens(word,X1),
+         read_csv("Rowling_HP7.txt",col_names=FALSE) %>% unnest_tokens(word,X1)) %>%
+  count(word,sort=TRUE)
+
+JK_Total_measure <- JK_Dataframe %>% summarize(total_types = n(),
+                                                 total_hapax = sum(n==1))
+
+HG_Total_measure <- Hunger_Game_Dataframe %>% summarize(total_types = n(),
+                                                   total_hapax = sum(n==1))
+
+jk_word_ha <- HP_dataframe %>% group_by(book, word) %>% summarise(hapaxes = n())
+jk_types_hapax <- jk_word_ha %>% filter(hapaxes ==1) %>% count(book)
+jk_types_hapax$types <- (jk_word_ha %>% count(book))$n
+
+colnames(jk_types_hapax) <- c("book", "hapaxes", "types")
+jk_types_hapax$percent <- jk_types_hapax$hapaxes *100 / jk_types_hapax$types
+
+
+
+
+
+Hunger_word_ha <-  Hunger_Game_Dataframe %>% group_by(book, word) %>% summarise(hapaxes = n())
+Hunger_types_hapax <- Hunger_word_ha %>% filter(hapaxes ==1) %>% count(book)
+Hunger_types_hapax$types <- (Hunger_word_ha %>% count(book))$n
+
+colnames(Hunger_types_hapax) <- c("book", "hapaxes", "types")
+Hunger_types_hapax$percent <- Hunger_types_hapax$hapaxes *100 / Hunger_types_hapax$types
+
+
+
+# I used Stylo() Stylo.network in order to find the 
+# This results that Galbrait Cuckoo is J K Rowling and also JK Rowling wrote the Rowling Leopard book which is similar to Harry Potter
+
+
+### ######  
+##   Another method for Hapaxes of Hunger Games
+
+lof <- list.files(path = ".", recursive = TRUE, pattern = "\\.txt$",full.names = TRUE) 
+lof <- Filter(function(x) grep1("Collins", x), lof)
+HG_df = data.frame(stringsAsFactors = FALSE)
+
+for (file in lof){
+  HG_df <- rbind(HG_df, data.frame(book= substring(file, 10,20), text = readLines(file), stringsAsFactors = FALSE))
+  
+}
+HG_Dataframe2 <- HG_df %>% unnest_tokens(word,text) %>% group_by(book, word) %>% anti_join(stop_words) %>% count(word, sort = TRUE)
+
+
+HG_word_ha <- HG_Dataframe2 %>% group_by(book, word)
+colnames(HG_word_ha) <- c("book", "word", "hapaxes")
+HungerGames_types_hapax <- HG_word_ha %>% filter(hapaxes == 1) %>% count(book)
+
+title = HungerGames_types_hapax$book
+
+books = c("Collins_HG1","Collins_HG2","Collins_HG3")
+HungerGames_types_hapax = data.frame(book= books, hapaxes = c(0,0,0), types= c(0,0,0), stringsAsFactors = FALSE)
+
+
+
+
+for(i in 1: length(title)){
+  HungerGames_types_hapax[substr(title[i],11,11),2] <- HungerGames_types_hapax[substr(title[i],11,11),2] + 1
+}
+
+title = HG_word_ha$book
+
+for(i in 1: length(title)){
+  HungerGames_types_hapax[substr(title[i],11,11),3] <- HungerGames_types_hapax[substr(title[i],11,11),3] + 1
+}
+
+HungerGames_types_hapax$percent <- HungerGames_types_hapax$hapaxes * 100 / HungerGames_types_hapax$types
