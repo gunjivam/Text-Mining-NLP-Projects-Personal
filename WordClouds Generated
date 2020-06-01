@@ -1,0 +1,66 @@
+# Libraries for Silge & Robinson Chapter 1 ----
+
+library(tidyverse)
+library(tidytext)
+library(gutenbergr)
+library(wordcloud)
+
+# Import book and create tidy, stopword-removed text ----
+
+invman_tidy_no_stop <- gutenberg_download(5230) %>%
+  unnest_tokens(word,text) %>% 
+  anti_join(stop_words)
+bs_tidy_no_stop <- gutenberg_download(30486) %>%
+  unnest_tokens(word,text) %>% 
+  anti_join(stop_words)
+hg_tidy_no_stop <- gutenberg_download(19229) %>%
+  unnest_tokens(word,text) %>% 
+  anti_join(stop_words)
+ja_no_stop <- gutenberg_download(105) %>%
+  unnest_tokens(word,text) %>% 
+  anti_join(stop_words)
+
+# Create word frequency table 
+# (for wordcloud R package, don't need this for 
+#   wordcloud.com)
+
+invman_freq <- invman_tidy_no_stop %>%
+  count(word,sort=TRUE)
+bs_freq <- bs_tidy_no_stop %>%
+  count(word,sort=TRUE)
+hg_freq <- hg_tidy_no_stop %>%
+  count(word,sort=TRUE)
+ja_freq <- ja_no_stop %>%
+  count(word,sort=TRUE)
+
+
+# Create (very) basic wordcloud using the wordcloud package ----
+
+invman_freq %>%
+  with(wordcloud(word, n, max.words = 1000))
+
+bs_freq %>%
+  with(wordcloud(word, n, max.words = 1000))
+
+hg_freq %>%
+  with(wordcloud(word, n, max.words = 1000))
+
+ja_freq %>%
+  with(wordcloud(word, n, max.words = 1000))
+
+
+# Create text file for wordcloud.com ----
+
+write.table(invman_tidy_no_stop$word,"invisible_man.txt",
+            sep=" ", row.names = FALSE, quote = FALSE)
+write.table(bs_tidy_no_stop$word,"shirley.txt",
+            sep=" ", row.names = FALSE, quote = FALSE)
+write.table(hg_tidy_no_stop$word,"anticipations.txt",
+            sep=" ", row.names = FALSE, quote = FALSE)
+write.table(ja_tidy_no_stop$word,"persuasion.txt",
+            sep=" ", row.names = FALSE, quote = FALSE)
+
+# FYI, the last line ensures that in the txt file
+# (1) words are separated with spaces
+# (2) row names are not included with the words, and  
+# (3) there are no quotes around the words.
