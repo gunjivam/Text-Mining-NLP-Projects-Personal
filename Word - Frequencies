@@ -1,0 +1,40 @@
+# Libraries for Silge & Robinson Chapter 1 ----
+
+library(gutenbergr)
+library(tidyverse)
+library(tidytext)
+
+# Import Austen books ----
+
+ja_books <- gutenberg_download(c(161,1342,141,158,121,105))
+hgw_books <- gutenberg_download(c(35,36,159,5230))
+bs_books <- gutenberg_download(c(767,768,969,1260,9182))
+
+# Tidy Austen books ----
+
+ja_tidy <- ja_books %>%
+  unnest_tokens(word,text)
+hgw_tidy <- hgw_books %>%
+  unnest_tokens(word,text)
+bs_tidy <- bs_books %>%
+  unnest_tokens(word,text)
+
+# Get word frequencies for Austen books ----
+
+ja_word_freq <- ja_tidy %>%
+  count(word,sort=TRUE)
+hgw_word_freq <- hgw_tidy %>%
+  count(word,sort=TRUE)
+bs_word_freq <- bs_tidy %>%
+  count(word,sort=TRUE)
+
+# It might be interesting to see What happens 
+# if you set sort=FALSE (or just delete "sort=TRUE")
+# above.  
+ja_total <- sum(ja_word_freq$n)
+ja_10 <- sum(top_n(ja_word_freq,50)$n)
+
+ja_total
+ja_10
+ja_10/ja_total
+
