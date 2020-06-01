@@ -1,0 +1,268 @@
+# Libraries-----
+library(gutenbergr)
+library(tidyverse)
+library(tidytext)
+library(topicmodels)
+library(scales)
+
+# Import Hist ----
+
+
+hist_text <- read_delim("hist.txt", "\t", escape_double = FALSE, 
+                        trim_ws = TRUE) %>% unnest_tokens(word,text)
+
+# Assumes you have data frame ja_tidy from unit 3.
+# It has one column for "gutenber_id" and one for "word".
+# (You may want to have the books labeled with their
+# actual titles rather than their Gutenberg IDs.
+# Makes identifying the "documents" easier in LDA.)
+
+# Get word frequencies and remove stopwords.
+
+hist_word_freq_no_stop <- hist_text %>%
+  unnest_tokens(word,word) %>%
+  anti_join(stop_words) %>%
+  count(word,chapter)
+
+# Just in case there are NA cells, eliminate those.
+hist_word_freq_no_stop <- hist_word_freq_no_stop[complete.cases(hist_word_freq_no_stop),]
+
+# For consistency with document-term matrix
+# we'll rename headings (optional) 
+names(hist_word_freq_no_stop) <- c("term","document","n")
+
+# We've eliminated stopwords but could eliminate 
+# low-frequency terms (numbers) too, so long as they
+# play no role in creating topics.
+
+
+# Cast tidy data frame into document term matrix.
+hist_dtm <- hist_word_freq_no_stop %>%
+  cast_dtm(document,term,n)
+
+# LDA.  Choosing 10 topics just to see.  
+# This will take a minute or two.
+hist_lda <- LDA(hist_dtm,k=30,control = list(seed = 1234))
+
+# The object ja_lda is a wrapper for lots of LDA outputs.
+# We only care here about the two matrices beta and gamma.  
+# Beta relates the words in the topics.
+# Gamma relates the topics in the documents.
+
+# Getting beta matrix from ja_lda.
+hist_topics <- tidy(hist_lda,matrix="beta")
+
+# Looking up the top 10 words in each topic.
+hist_top_terms <- hist_topics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+
+# Plot topics as bar chart.  One small note:  we are
+# treating the topic column as a factor here so that
+# it works as a facet.
+
+########################################################################################
+
+
+#Barchart from Topic 1 to 5
+hist_top_terms %>%  
+  filter(topic <= 5) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 1 to 5")
+
+#Barchart from Topic 5 to 10
+hist_top_terms %>%  
+  filter(topic > 5 & topic <=10) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 5 to 10")
+
+#Barchart from Topic 10 to 15
+hist_top_terms %>%  
+  filter(topic > 10 & topic <=15) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 10 to 15")
+
+#Barchart from Topic 15 to 20
+hist_top_terms %>%  
+  filter(topic > 15 & topic <=20) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 15 to 20")
+
+#Barchart from Topic 20 to 25
+hist_top_terms %>%  
+  filter(topic > 20 & topic <=25) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 20 to 25")
+
+#Barchart from Topic 25 to 30
+hist_top_terms %>%  
+  filter(topic > 25 & topic <=30) %>%
+  ggplot(aes(term, beta, fill = factor(as.factor(topic)))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered() +
+  ggtitle("Barchart from Topic 25 to 30")
+
+
+# Getting gamma, which gives the topics in the documents.
+hist_docs <- tidy(hist_lda,matrix="gamma")
+
+# Plot this as a tile plot.
+
+#########################Plot from Topic 1 to 5#####################################################################################################
+
+#Tile Plot from Topic 1 to 5 & Document upto 30
+hist_docs %>%
+  filter(topic <= 5) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 1 to 5 & Document upto 30")
+
+#Tile Plot from Topic 1 to 5 & Document after 30
+hist_docs %>%
+  filter(topic <= 5) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 1 to 5 & Document after 30")
+
+#########################Plot from Topic 5 to 10#####################################################################################################
+
+#Tile Plot from Topic 5 to 10 & Document upto 30
+hist_docs %>%
+  filter(topic > 5 & topic <=10) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 5 to 10 & Document upto 30")
+
+#Tile Plot from Topic 5 to 10 & Document after 30
+hist_docs %>%
+  filter(topic > 5 & topic <=10) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 5 to 10 & Document after 30")
+
+#########################Plot from Topic 10 to 15 #####################################################################################################
+
+#Tile Plot from Topic 10 to 15 & Document upto 30
+hist_docs %>%
+  filter(topic > 10 & topic <=15) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 10 to 15 & Document upto 30")
+
+#Tile Plot from Topic 10 to 15 & Document after 30
+hist_docs %>%
+  filter(topic > 10 & topic <=15) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 10 to 15 & Document after 30")
+
+#########################Plot from Topic 15 to 20 #####################################################################################################
+
+#Tile Plot from Topic 15 to 20 & Document upto 30
+hist_docs %>%
+  filter(topic > 15 & topic <=20) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 15 to 20 & Document upto 30")
+
+#Tile Plot from Topic 15 to 20 & Document after 30
+hist_docs %>%
+  filter(topic > 15 & topic <=20) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 15 to 20 & Document after 30")
+
+#########################Plot from Topic 20 to 25 #####################################################################################################
+
+#Tile Plot from Topic 20 to 25 & Document upto 30
+hist_docs %>%
+  filter(topic > 20 & topic <=25) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 20 to 25 & Document upto 30")
+
+#Tile Plot from Topic 20 to 25 & Document after 30
+hist_docs %>%
+  filter(topic > 20 & topic <=25) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 20 to 25 & Document after 30")
+
+#########################Plot from Topic 25 to 30 #####################################################################################################
+
+#Tile Plot from Topic 25 to 30 & Document upto 30
+hist_docs %>%
+  filter(topic > 25 & topic <=30) %>%
+  filter(document <= 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 25 to 30 & Document upto 30")
+
+#Tile Plot from Topic 25 to 30 & Document after 30
+hist_docs %>%
+  filter(topic > 25 & topic <=30) %>%
+  filter(document > 30) %>%
+  ggplot(aes(document, topic, fill = gamma)) +
+  geom_tile(color="grey") +
+  scale_fill_gradient2(high = "red", label = percent_format()) +
+  coord_flip() +
+  ggtitle("Tile Plot from Topic 25 to 30 & Document after 30")
+
+#########################################################################################################################################################
