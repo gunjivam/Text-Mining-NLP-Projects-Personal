@@ -1,0 +1,96 @@
+# Better Bar Plots for Austen ----
+library(tidyverse)
+library(tidytext)
+library(gutenbergr)
+library(ggplot2)
+
+# This script assumes you have already generated data frame
+# ja_word_freq_nostop (i.e. it is in Environment pane)
+# Import Austen books ----
+
+ja_books <- gutenberg_download(c(161,1342,141,158,121,105))
+hg_books <- gutenberg_download(c(35,36,159,5230))
+bs_books <- gutenberg_download(c(767,768,969,1260,9182))
+
+# Tidy Austen books ----
+
+ja_tidy_no_stop <- ja_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+hg_tidy_no_stop <- hg_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+bs_tidy_no_stop <- bs_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+
+# Get word frequencies for Austen books ----
+
+ja_word_freq_no_stop <- ja_tidy_no_stop %>%
+  count(word,sort=TRUE)
+hg_word_freq_no_stop <- hg_tidy_no_stop %>%
+  count(word,sort=TRUE)
+bs_word_freq_no_stop <- bs_tidy_no_stop %>%
+  count(word,sort=TRUE)
+
+# First we want to just get the top 10 words in Austen.
+
+ja_word_freq_no_stop_13 <- top_n(ja_word_freq_no_stop,13)
+hg_word_freq_no_stop_13 <- top_n(hg_word_freq_no_stop,13)
+bs_word_freq_no_stop_13 <- top_n(bs_word_freq_no_stop,13)
+
+# The "word" column will be sorted alphabetically by default.
+# If you want to sort by "n" instead, use
+
+ja_word_freq_no_stop_13 <- mutate(ja_word_freq_no_stop_13,word=reorder(word,n))
+hg_word_freq_no_stop_13 <- mutate(hg_word_freq_no_stop_13,word=reorder(word,n))
+bs_word_freq_no_stop_13 <- mutate(bs_word_freq_no_stop_13,word=reorder(word,n))
+# Now the plot, with a few theme elements thrown in:
+
+ggplot(ja_word_freq_no_stop_13,aes(word,n)) +     
+  geom_col(color="black",fill="green")+               #  geom=columns (bars)
+  xlab(NULL)+               #  theme 
+  ylab(NULL)+               #  theme
+  coord_flip()              #  theme 
+ggplot(hg_word_freq_no_stop_13,aes(word,n)) +     
+  geom_col(color="white",fill= "red")+               #  geom=columns (bars)
+  xlab(NULL)+               #  theme 
+  ylab(NULL)+               #  theme
+  coord_flip()              #  theme 
+ggplot(bs_word_freq_no_stop_13,aes(word,n)) +     
+  geom_col(color="yellow",fill="blue")+               #  geom=columns (bars)
+  xlab(NULL)+               #  theme 
+  ylab(NULL)+               #  theme
+  coord_flip()              #  theme 
+
+
+# I encourage you to comment out (or delete) or otherwise change
+# various lines above to see what happens.
+
+# To do without creating any intermediate datasets, 
+# use the pipe %>% operator.
+
+ja_word_freq_no_stop %>%               
+  top_n(13) %>%                        
+  mutate(word=reorder(word,n)) %>%     
+  ggplot(top_n(ja_word_freq_no_stop,13),aes(word,n)) +                #  aes map (x=word, y=n)  
+  geom_col()+                          
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()    
+ja_word_freq_no_stop %>%               
+  top_n(13) %>%                        
+  mutate(word=reorder(word,n)) %>%     
+  ggplot(top_n(ja_word_freq_no_stop,13),aes(word,n)) +                #  aes map (x=word, y=n)  
+  geom_col()+                          
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()    
+ja_word_freq_no_stop %>%               
+  top_n(13) %>%                        
+  mutate(word=reorder(word,n)) %>%     
+  ggplot(top_n(ja_word_freq_no_stop,13),aes(word,n)) +                #  aes map (x=word, y=n)  
+  geom_col()+                          
+  xlab(NULL)+                           
+  ylab(NULL)+                          
+  coord_flip()    
