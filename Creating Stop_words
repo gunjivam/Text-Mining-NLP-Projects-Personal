@@ -1,0 +1,54 @@
+# Libraries for Silge & Robinson Chapter 1 ----
+
+library(gutenbergr)
+library(tidyverse)
+library(tidytext)
+ 
+# Import Austen books ----
+
+ja_books <- gutenberg_download(c(161,1342,141,158,121,105))
+hg_books <- gutenberg_download(c(35,36,159,5230))
+bs_books <- gutenberg_download(c(767,768,969,1260,9182))
+
+# Tidy Austen books ----
+
+ja_tidy_no_stop <- ja_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+hg_tidy_no_stop <- hg_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+bs_tidy_no_stop <- bs_books %>%
+  unnest_tokens(word,text) %>%
+  anti_join(stop_words)
+
+# Get word frequencies for Austen books ----
+
+ja_word_freq_no_stop <- ja_tidy_no_stop %>%
+  count(word,sort=TRUE)
+hg_word_freq_no_stop <- hg_tidy_no_stop %>%
+  count(word,sort=TRUE)
+bs_word_freq_no_stop <- bs_tidy_no_stop %>%
+  count(word,sort=TRUE)
+
+# Create basic barplot for no-stopwords Austen books ----
+
+barplot(top_n(ja_word_freq_no_stop,10)$n,names=top_n(ja_word_freq_no_stop,10)$word)
+barplot(top_n(hg_word_freq_no_stop,10)$n,names=top_n(hg_word_freq_no_stop,10)$word)
+barplot(top_n(bs_word_freq_no_stop,10)$n,names=top_n(bs_word_freq_no_stop,10)$word)
+
+# Of course if you want to see more words just change
+# the "10" above, or take a look at the 
+# ja_word_freq_no_stop table.
+
+#I felt interesting to see these
+
+# First one for the whole dataset.
+barplot(ja_word_freq_no_stop$n)
+barplot(hg_word_freq_no_stop$n)
+barplot(bs_word_freq_no_stop$n)
+
+# Then one for the top 1000 words.
+barplot(top_n(ja_word_freq_no_stop,1000)$n)
+barplot(top_n(hg_word_freq_no_stop,1000)$n)
+barplot(top_n(bs_word_freq_no_stop,1000)$n)
