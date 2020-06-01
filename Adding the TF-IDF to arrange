@@ -1,0 +1,36 @@
+library(base)
+library(readr)
+library(tidyverse)
+library(tidytext)
+
+hist_text <- read_delim("hist.txt", "\t", escape_double = FALSE, 
+                   trim_ws = TRUE,col_names=TRUE) %>% unnest_tokens(word,text)
+
+
+
+# Get word frequencies for History Chapters ----
+
+hist_word_freq_by_chapter <- hist_text %>%
+  group_by(chapter) %>%
+  count(word,sort=TRUE)
+
+
+
+# Add tf_idf column with bind_tf_idf (and arrange big to small)
+
+hist_tf_idf <- hist_word_freq_by_chapter %>%
+  bind_tf_idf(word,chapter,n) %>%
+  arrange(desc(tf_idf))
+
+
+
+#  Regroup and sort out top 5 
+
+hist_top_by_chap_top <- hist_tf_idf %>%
+  group_by(chapter) %>% arrange(desc(chapter)) %>%
+  top_n(5) 
+
+
+
+
+
