@@ -1,0 +1,71 @@
+# Necessary libraries----
+# We'll use the janeaustenr library for Austen books,
+# it's a little easier than gutenbergr.
+library(tidyverse)
+library(tidytext)
+library(readr)
+library(dplyr)
+
+#Reading the File
+LastChristmasReviews_1_ <- read_csv("test.txt")
+
+
+
+# Tidy data for File
+LCR_tidy_chaps <- LastChristmasReviews_1_ %>% unnest_tokens(word,text)
+
+# Get Pos/Neg Sentiments----
+
+# Just need to join with bing data frame
+
+LCR_bing_sent <- LCR_tidy_chaps %>% 
+  inner_join(get_sentiments("bing"))
+
+# That seperates out words that are pos/neg.
+# Now tally them by source and metacritic
+
+LCR_meta_sent_bing <- LCR_bing_sent %>%
+  count(source,metacritic,sentiment)
+
+# Get pos/neg difference----
+
+# Each chapter has two values now:  pos & neg.
+# Use spread to create two columns with these
+# (Easier to calculate the difference this way)
+
+LCR_meta_sent_bing <- LCR_meta_sent_bing %>%
+  spread(sentiment,n,fill=0)
+
+# Create difference column
+
+LCR_meta_sent_bing <- LCR_meta_sent_bing %>%
+  mutate(diff = positive - negative)
+
+# Plot----
+
+ggplot(LCR_meta_sent_bing,aes(x=source,y=metacritic,fill=source)) + 
+  geom_col(show.legend = FALSE) +
+  geom_text((aes(label = metacritic, y = metacritic + 2))) +
+  ggtitle("Metacritic Scores for the Reviews")
+
+
+# Without all the intermediate files----
+# Here it is all in one pipe.
+
+LCR_bing_frame <- LastChristmasReviews_1_ %>% 
+  unnest_tokens(word,text) %>%
+  inner_join(get_sentiments("bing")) %>%  
+  count(source,metacritic,sentiment) %>%
+  spread(sentiment,n,fill=0) %>%
+  mutate(diff = positive - negative)
+
+# Now plot
+
+ggplot(LCR_bing_frame,aes(x=source,y=diff,fill=source)) + 
+  geom_col(show.legend = FALSE) +
+  geom_text((aes(label = diff, y = diff + 2))) +
+  ggtitle("The Bing sentiment Difference for the Reviews")
+
+#Correlation between Metacritic Score and Bing Section
+
+cor(LCR_bing_frame %>% select(metacritic),LCR_bing_frame %>% select(diff))
