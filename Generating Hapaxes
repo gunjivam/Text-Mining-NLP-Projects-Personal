@@ -1,0 +1,38 @@
+library(tidyverse)
+library(tidytext)
+library(gutenbergr)
+library(ggplot2)
+
+ja_types_hapax <- gutenberg_download(c(161,1342,141,158,121,105)) %>%
+  unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% count(gutenberg_id)
+
+ja_types_hapax$types <- (gutenberg_download(c(161,1342,141,158,121,105)) %>%
+                           unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% filter(hapaxes == 1) %>% count(gutenberg_id))$n
+colnames(ja_types_hapax) <- c("gutenberg_id","types","hapaxes")
+
+hg_types_hapax <- gutenberg_download(c(35,36,159,5230)) %>%
+  unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% count(gutenberg_id)
+
+hg_types_hapax$types <- (gutenberg_download(c(35,36,159,5230)) %>%
+                           unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% filter(hapaxes == 1) %>% count(gutenberg_id))$n
+colnames(hg_types_hapax) <- c("gutenberg_id","types","hapaxes")
+
+
+bs_types_hapax <- gutenberg_download(c(767,768,969,1260,9182)) %>%
+  unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% count(gutenberg_id)
+
+bs_types_hapax$types <- (gutenberg_download(c(767,768,969,1260,9182)) %>%
+                           unnest_tokens(word,text) %>% group_by(gutenberg_id) %>% slice(gutenberg_id, 1:30000) %>% group_by(gutenberg_id, word) %>% summarise(hapaxes=n()) %>% filter(hapaxes == 1) %>% count(gutenberg_id))$n
+colnames(bs_types_hapax) <- c("gutenberg_id","types","hapaxes")
+
+#avg_types_hapax <- gutenberg_download(c(767,768,969,1260,9182)) %>%
+##unnest_tokens(word,text) %>% group_by(gutenberg_authors) %>% slice(gutenberg_authors, 1:30000) %>% group_by(gutenberg_authors, word) %>% summarise(avghapaxes=mean(n())) %>% count(gutenberg_authors)
+
+#avg_types_hapax$types <- (gutenberg_download(c(767,768,969,1260,9182)) %>%
+#                           unnest_tokens(word,text) %>% group_by(gutenberg_authors) %>% slice(gutenberg_authors, 1:30000) %>% group_by(gutenberg_authors, word) %>% summarise(avghapaxes=mean(n())) %>% count(gutenberg_authors))$mean(n)
+#colnames(avg_types_hapax) <- c("gutenberg_authors","types","avghapaxes")
+
+avg_types_hapax <- t(data.frame(colMeans(ja_types_hapax),colMeans(hg_types_hapax),colMeans(bs_types_hapax)))
+rownames(avg_types_hapax) <- c("Austen","Wells","Brontes")
+colnames(avg_types_hapax) <- c("gutenberg_id","Avg types","Avg hapaxes")
+
